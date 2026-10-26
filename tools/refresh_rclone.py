@@ -26,7 +26,7 @@ def main() -> None:
     addon = root / "rclone_backup_web"
     config_path = addon / "config.yaml"
     config = config_path.read_text(encoding="utf-8")
-    version_match = re.search(r'^version: "(\d+)\.(\d+)\.(\d+)"$', config, re.M)
+    version_match = re.search(r'''^version:\s*["\']?(\d+)\.(\d+)\.(\d+)["\']?\s*$''', config, re.M)
     if not version_match:
         raise SystemExit("Cannot find add-on version; no files changed.")
     major, minor, patch = map(int, version_match.groups())

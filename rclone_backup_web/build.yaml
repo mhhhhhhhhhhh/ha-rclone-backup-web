@@ -5,6 +5,6 @@ build_from:
   armv7: ghcr.io/hassio-addons/base-python/armv7:16.1.4
   i386: ghcr.io/hassio-addons/base-python/i386:16.1.4
 args:
-  RCLONE_REFRESH: ingress-1.1.0-2026-10-26
+  RCLONE_REFRESH: mfa-security-1.2.0-2026-10-26
   UPSTREAM_REF: main
   WEB_REF: main

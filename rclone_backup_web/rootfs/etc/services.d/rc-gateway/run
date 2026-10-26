@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bashio
+set -eu
+bashio::log.info "Starting the loopback RC gateway with sanitized errors"
+exec python3 /usr/bin/rc_gateway.py

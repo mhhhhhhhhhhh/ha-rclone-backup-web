@@ -4,4 +4,4 @@ bashio::log.info "Starting the loopback-only rclone API for Home Assistant Ingre
 exec rclone rcd \
     --rc-addr=127.0.0.1:5572 \
     --rc-no-auth \
-    --rc-serve
+    --rc-serve >/dev/null 2>&1

@@ -13,5 +13,28 @@
     pass: ''
   };
   localStorage.setItem(key, JSON.stringify({state, version: 0}));
+
+  // Keep config credentials/code out of browser request URLs, including SDK edits.
+  const originalFetch=window.fetch.bind(window);
+  window.fetch=async function(input,init) {
+    const req=new Request(input,init);
+    const target=new URL(req.url,location.href);
+    const rcPrefix=prefix+'/rc/config/';
+    if (target.origin===location.origin && target.pathname.startsWith(rcPrefix) && req.method==='POST' && target.search) {
+      const data={};
+      target.searchParams.forEach((value,key)=>{data[key]=value;});
+      for (const key of ['parameters','opt']) {
+        if (typeof data[key]==='string') { try {data[key]=JSON.parse(data[key]);} catch (_) {} }
+      }
+      if (req.headers.get('content-type')?.includes('application/json')) {
+        try {Object.assign(data,await req.clone().json());} catch (_) {}
+      }
+      target.search='';
+      const headers=new Headers(req.headers);headers.set('Content-Type','application/json');
+      return originalFetch(target.href,{method:'POST',headers,body:JSON.stringify(data),signal:req.signal,credentials:req.credentials,cache:'no-store'});
+    }
+    return originalFetch(req);
+  };
+
 })();
 </script>

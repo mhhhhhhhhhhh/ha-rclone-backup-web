@@ -1,5 +1,15 @@
 # Änderungen
 
+## 1.2.0
+
+- iCloud-MFA-Dialog, SMS-Fallback und Telefonnummernauswahl.
+- Nicht-interaktive Konfiguration mit exakt weitergereichtem rclone-Zustand.
+- Leere Codes werden vor dem API-Aufruf abgefangen.
+- Fehler-Gateway entfernt Eingabedaten und ersetzt rohe Backendfehler durch sichere Meldungen.
+- Konfigurationsdaten und MFA-Code im JSON-Body statt in der URL.
+- UI-Fehlerfilter und Entfernen der Passwortfelder nach der Einrichtung.
+- Vorhandene iCloud-Remotes nur nach Bestätigung erneut anmelden; keine automatische Löschung.
+
 ## 1.1.1
 
 - Build-Abbruch TS1005 in App.tsx behoben: Asset-Patch verwendet den TypeScript-Syntaxbaum statt einer globalen Regex.

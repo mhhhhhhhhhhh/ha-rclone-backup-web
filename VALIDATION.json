@@ -1,19 +1,45 @@
 {
-  "version": "1.1.1",
-  "checks": [
+  "version": "1.2.0",
+  "executed_tests": [
+    "Gateway preserves MFA question/state and strips echoed input",
+    "MFA state continuation over loopback HTTP completes on simulated accepted code",
+    "Wrong-code errors classified; password/cookie/token/code not returned",
+    "Generic raw backend error sanitized",
+    "Password question Default cleared",
+    "Legacy configuration query normalized into upstream JSON body",
+    "Chunked upload streamed correctly",
+    "Gateway request/error logs contain no raw secrets"
+  ],
+  "build_time_tests_not_executed_locally": [
+    "Node MFA/SMS/phone-selection flow tests",
+    "Empty-code validation",
+    "Incorrect-code retries",
+    "Cancellation",
+    "Existing remote uses update, not delete/create",
+    "Frontend error sanitization",
+    "Own helper TypeScript typecheck",
+    "Full upstream tsc/Vite build"
+  ],
+  "not_executed": [
+    "Full Docker build",
+    "Real Home Assistant runtime",
+    "Real Apple account login",
+    "Apple account-specific policy and access checks"
+  ],
+  "syntax_and_file_checks": [
     {
       "file": "repository.yaml",
-      "check": "YAML parsing",
+      "check": "YAML parse",
       "result": "pass"
     },
     {
       "file": "rclone_backup_web/build.yaml",
-      "check": "YAML parsing",
+      "check": "YAML parse",
       "result": "pass"
     },
     {
       "file": "rclone_backup_web/config.yaml",
-      "check": "YAML parsing",
+      "check": "YAML parse",
       "result": "pass"
     },
     {
@@ -28,6 +54,16 @@
     },
     {
       "file": "rclone_backup_web/rootfs/etc/cont-init.d/init.sh",
+      "check": "bash -n",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/rootfs/etc/services.d/rc-gateway/run",
+      "check": "bash -n",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/rootfs/etc/services.d/rc-gateway/finish",
       "check": "bash -n",
       "result": "pass"
     },
@@ -47,32 +83,14 @@
       "result": "pass"
     },
     {
-      "check": "Docker RUN shell syntax",
+      "file": "rclone_backup_web/rootfs/usr/bin/rc_gateway.py",
+      "check": "Python compilation",
       "result": "pass"
     },
     {
-      "check": "Original quoted-selector corruption reproduced",
+      "file": "rclone_backup_web/Dockerfile",
+      "check": "RUN sh -n",
       "result": "pass"
-    },
-    {
-      "check": "Entire fixed Python patch against synthetic fixtures",
-      "result": "pass"
-    },
-    {
-      "check": "Node AST regression test included in build",
-      "result": "not executed locally"
     }
-  ],
-  "user_log_evidence": {
-    "rclone": "1.75.2 checksum/download passed",
-    "scheduler": "build passed",
-    "web_build_1.1.0": "failed: TS1005 App.tsx(95,121)"
-  },
-  "not_executed": [
-    "Node AST tests (run automatically in Docker build)",
-    "npm/TypeScript/Vite build",
-    "full Docker build",
-    "nginx runtime",
-    "Home Assistant runtime"
   ]
 }

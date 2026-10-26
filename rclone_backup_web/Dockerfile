@@ -8,10 +8,13 @@ RUN curl -fL --retry 3 \
       -o /tmp/web.tar.gz \
     && tar -xzf /tmp/web.tar.gz --strip-components=1 -C /web \
     && rm /tmp/web.tar.gz
-COPY patch_web.py patch_assets.cjs ingress-bootstrap.html /patch/
+COPY patch_web.py patch_assets.cjs patch_setup.cjs test_setup.cjs ingress-bootstrap.html ha_config_flow.ts ha_safe_error.ts ha_remote_setup.ts /patch/
 RUN python3 /patch/patch_web.py \
     && npm ci \
+    && cp /patch/ha_*.ts /web/src/lib/ \
     && node /patch/patch_assets.cjs \
+    && node /patch/patch_setup.cjs \
+    && node /patch/test_setup.cjs \
     && npm run build -- --base ./ \
     && test -f dist/index.html
 
@@ -43,7 +46,7 @@ ARG BUILD_ARCH
 ARG BUILD_VERSION
 ARG RCLONE_REFRESH=initial
 ENV LANG=C.UTF-8
-RUN apk add --no-cache curl unzip nginx fuse \
+RUN apk add --no-cache curl unzip nginx fuse python3 \
     && sed -i 's/#user_allow_other/user_allow_other/' /etc/fuse.conf \
     && ln -sf /bin/fusermount /bin/fusermount3
 
