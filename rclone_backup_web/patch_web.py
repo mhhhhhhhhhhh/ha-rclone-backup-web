@@ -37,12 +37,8 @@ def main() -> None:
                     "return `${parsed.origin}${window.__HA_INGRESS_PATH__}/serve/${portMatch[1]}`")
     require_replace("src/pages/RemotesDetails.tsx", r"addr:\s*['\"]:0['\"]",
                     "addr: '127.0.0.1:0'")
-    # Replace absolute public asset paths used by JSX src attributes.
-    for file in Path("src").rglob("*.tsx"):
-        source = file.read_text(encoding="utf-8")
-        source = re.sub(r'''src=["'](/[^"']+\.(?:svg|png|ico|jpg|webp))["']''',
-                        lambda m: "src={window.__HA_INGRESS_PATH__ + " + repr(m.group(1)) + "}", source)
-        file.write_text(source, encoding="utf-8")
+    # JSX assets are patched separately by patch_assets.cjs using TypeScript's AST.
+    # Never apply a regex to arbitrary TSX text: selectors may contain src="...".
     Path("src/ha-ingress.d.ts").write_text(
         "interface Window { __HA_INGRESS_PATH__: string }\n", encoding="utf-8")
     index = Path("index.html")

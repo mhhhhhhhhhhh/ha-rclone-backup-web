@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.1.1",
   "checks": [
     {
       "file": "repository.yaml",
@@ -47,23 +47,32 @@
       "result": "pass"
     },
     {
-      "file": "rclone_backup_web/Dockerfile",
-      "check": "RUN sh -n",
+      "check": "Docker RUN shell syntax",
       "result": "pass"
     },
     {
-      "file": "ingress implementation",
-      "check": "metadata, loopback binding, gateway allowlist, HTML substitution, synthetic patch cases",
+      "check": "Original quoted-selector corruption reproduced",
       "result": "pass"
+    },
+    {
+      "check": "Entire fixed Python patch against synthetic fixtures",
+      "result": "pass"
+    },
+    {
+      "check": "Node AST regression test included in build",
+      "result": "not executed locally"
     }
   ],
+  "user_log_evidence": {
+    "rclone": "1.75.2 checksum/download passed",
+    "scheduler": "build passed",
+    "web_build_1.1.0": "failed: TS1005 App.tsx(95,121)"
+  },
   "not_executed": [
-    "Docker build",
-    "npm ci and TypeScript/Vite build against live upstream",
-    "nginx configuration/runtime test (nginx -t runs in Docker build)",
-    "Home Assistant installation and sidebar toggle",
-    "browser navigation, API, uploads and downloads",
-    "backup execution and mounting"
-  ],
-  "scope": "Home Assistant ingress implementation, runtime unverified"
+    "Node AST tests (run automatically in Docker build)",
+    "npm/TypeScript/Vite build",
+    "full Docker build",
+    "nginx runtime",
+    "Home Assistant runtime"
+  ]
 }

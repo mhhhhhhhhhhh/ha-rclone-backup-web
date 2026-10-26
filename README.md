@@ -1,6 +1,6 @@
 # Rclone Backup Web – Home-Assistant-Ingress
 
-Version **1.1.0** ersetzt die bisherige Variante mit direktem Netzwerkport.
+Version **1.1.1** ersetzt die bisherige Variante mit direktem Netzwerkport.
 Das Add-on stellt die neue offizielle rclone-web-Oberfläche über HA-Ingress bereit.
 Die neueste stabile rclone-Version wird beim Neubauen geladen und mit SHA256 geprüft.
 
@@ -12,7 +12,7 @@ Die neueste stabile rclone-Version wird beim Neubauen geladen und mit SHA256 gep
 2. In `repository.yaml` deine eigene bereits eingetragene Repository-URL beibehalten
    oder die enthaltenen Platzhalter durch deinen Namen und Repository-Namen ersetzen.
 3. In HA den App/Add-on-Store aktualisieren bzw. unter dem Menü nach Updates suchen.
-4. **Rclone Backup Web** auf **1.1.0** aktualisieren. Der lokale Docker-Build muss
+4. **Rclone Backup Web** auf **1.1.1** aktualisieren. Der lokale Docker-Build muss
    ausgeführt werden, damit der angepasste Web-Build und Proxy installiert werden.
 5. App starten und **In der Seitenleiste anzeigen** aktivieren.
 6. **Weboberfläche öffnen** anklicken oder links **Rclone** öffnen.
@@ -107,3 +107,13 @@ sowie die Patch-Transformationen gegen synthetische Quelltextausschnitte wurden 
 Home-Assistant-Installation wurden hier ausgeführt.** Das ist ein Implementierungsstand
 mit Ingress-Unterstützung, kein als funktionierend verifiziertes HA-Release.
 VALIDATION.json nennt die ausgeführten und ausstehenden Prüfungen.
+
+## Build-Korrektur in 1.1.1
+
+Das Supervisor-Protokoll zeigte für 1.1.0 einen TypeScript-Syntaxfehler in App.tsx.
+Ursache war eine globale Asset-Regex, die auch einen CSS-Selektor innerhalb einer
+Zeichenkette veränderte. 1.1.1 verwendet für echte JSX-src-Attribute den TypeScript-AST.
+Der zugehörige Node-Regressionstest wird automatisch im Docker-Build ausgeführt.
+Hier wurde die ursprüngliche Fehlerursache reproduziert und das Python-Patchskript
+mit synthetischen Fixtures getestet. Node/TypeScript und der vollständige Docker-Build
+sind in der lokalen Erstellungsumgebung nicht verfügbar und wurden nicht ausgeführt.

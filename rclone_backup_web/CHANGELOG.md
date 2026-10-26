@@ -1,5 +1,11 @@
 # Änderungen
 
+## 1.1.1
+
+- Build-Abbruch TS1005 in App.tsx behoben: Asset-Patch verwendet den TypeScript-Syntaxbaum statt einer globalen Regex.
+- CSS-Selektoren und Kommentare werden beim JSX-Patch nicht mehr verändert.
+- Regressionstest und Prüfung der TSX-Syntax laufen vor dem Web-Build.
+
 ## 1.1.0
 
 - HA-Ingress mit Sidebar-Konfiguration statt direktem Netzwerkport.

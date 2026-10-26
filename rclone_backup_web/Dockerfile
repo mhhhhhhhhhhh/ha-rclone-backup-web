@@ -8,9 +8,10 @@ RUN curl -fL --retry 3 \
       -o /tmp/web.tar.gz \
     && tar -xzf /tmp/web.tar.gz --strip-components=1 -C /web \
     && rm /tmp/web.tar.gz
-COPY patch_web.py ingress-bootstrap.html /patch/
+COPY patch_web.py patch_assets.cjs ingress-bootstrap.html /patch/
 RUN python3 /patch/patch_web.py \
     && npm ci \
+    && node /patch/patch_assets.cjs \
     && npm run build -- --base ./ \
     && test -f dist/index.html
 
