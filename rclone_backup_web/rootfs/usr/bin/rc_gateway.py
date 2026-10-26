@@ -3,6 +3,8 @@
 import http.client
 import json
 import socket
+import threading
+import icloud_monitor as monitor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
@@ -18,6 +20,8 @@ MESSAGES = {
     "AUTH_FAILED": "Die Anmeldung wurde abgelehnt. Prüfe deine Zugangsdaten.",
     "UNKNOWN_STATE": "Der Anmeldeablauf konnte nicht fortgesetzt werden. Starte die Einrichtung erneut.",
     "PORT_BUSY": "address already in use",
+    "REAUTH_REQUIRED": "iCloud sign-in is required. Renew the existing remote in iCloud status.",
+    "ACCESS_ERROR": "iCloud access was rejected. Check Apple web access and device approval.",
     "REQUEST_FAILED": "Die rclone-Anfrage ist fehlgeschlagen. Es werden keine Eingabedaten angezeigt.",
 }
 
@@ -26,7 +30,11 @@ def safe_error(raw, status=500):
     if isinstance(raw, dict):
         raw = raw.get("error", raw.get("Error", ""))
     text = raw.lower() if isinstance(raw, str) else ""
-    if "session" in text and any(x in text for x in ("lost", "expired", "corrupt", "invalid")):
+    if any(x in text for x in ("trust token expired", "missing icloud trust token", "please reauth")):
+        code = "REAUTH_REQUIRED"
+    elif "missing pcs cookies" in text or "requestpcs:" in text:
+        code = "ACCESS_ERROR"
+    elif "session" in text and any(x in text for x in ("lost", "expired", "corrupt", "invalid")):
         code = "STATE_LOST"
     elif "unknown state" in text:
         code = "UNKNOWN_STATE"
@@ -84,13 +92,60 @@ class Gateway(BaseHTTPRequestHandler):
         if self.command != "HEAD": self.wfile.write(body)
         self.close_connection = True
 
+    def monitor_request(self, path):
+        if self.command != 'POST':
+            self.reply_json(405, safe_error(None,405));return
+        chunks=[];total=0
+        for chunk in self.body_chunks():
+            total+=len(chunk)
+            if total>MAX_CONFIG_BODY: raise ValueError('oversized body')
+            chunks.append(chunk)
+        raw=b''.join(chunks)
+        body=json.loads(raw) if raw else {}
+        if not isinstance(body,dict): raise ValueError('invalid body')
+        if path=='/ha/icloud/status':
+            self.reply_json(200,monitor.snapshot());return
+        if path=='/ha/icloud/check':
+            self.reply_json(200,monitor.check_all(force=True));return
+        name=body.get('name')
+        if not isinstance(name,str): raise ValueError('invalid remote')
+        with monitor.RC_LOCK:
+            if name not in monitor.remotes():
+                self.reply_json(404,safe_error(None,404));return
+            if path=='/ha/icloud/cancel':
+                monitor.mark_cancelled(name);self.reply_json(200,{});return
+            if path!='/ha/icloud/reauth':
+                self.reply_json(404,safe_error(None,404));return
+            opt={'nonInteractive':True}
+            if body.get('continue') is True:
+                state=body.get('state');result=body.get('result')
+                if not isinstance(state,str) or not state or not isinstance(result,str) or not result.strip():
+                    self.reply_json(400,{'error':MESSAGES['MFA_EMPTY'],'code':'MFA_EMPTY','status':400});return
+                opt.update({'continue':True,'state':state,'result':result})
+            # Empty parameters retain the server's existing password, ID and service.
+            status,data=monitor.rc('/config/update',{'name':name,'parameters':{},'opt':opt})
+            if status>=400 or data.get('error'):
+                self.reply_json(status if status>=400 else 500,safe_error(data,status));return
+            if data.get('Error'):data['Error']=safe_error(data['Error'])['error']
+            monitor.record_step(name,data)
+            if isinstance(data.get('Option'),dict) and data['Option'].get('IsPassword'):
+                data['Option']['Default']=''
+            # Only return the state/question, never the existing config.
+            self.reply_json(200,{k:data[k] for k in ('State','Option','Error') if k in data})
+
     def forward(self):
         conn = None
+        locked = False
         try:
             parsed = urlsplit(self.path)
             if parsed.scheme or parsed.netloc or not parsed.path.startswith("/"):
                 self.reply_json(400, safe_error(None, 400)); return
+            if parsed.path.startswith('/ha/icloud/'):
+                self.monitor_request(parsed.path);return
+            form = {}
             config_call = parsed.path.startswith("/config/")
+            if config_call:
+                monitor.RC_LOCK.acquire();locked=True
             headers = {k: v for k, v in self.headers.items() if k.lower() not in HOP_HEADERS and k.lower() not in {"authorization", "origin"}}
             headers["Accept-Encoding"] = "identity"
             upstream_path = self.path
@@ -142,6 +197,10 @@ class Gateway(BaseHTTPRequestHandler):
                     payload.pop("input",None)
                     if payload.get("Error"):
                         payload["Error"]=safe_error(payload["Error"])["error"]
+                    if parsed.path in ('/config/create','/config/update') and isinstance(form.get('name'),str):
+                        try:
+                            if form['name'] in monitor.remotes(): monitor.record_step(form['name'],payload)
+                        except (OSError,ValueError,http.client.HTTPException): pass
                     option=payload.get("Option")
                     if isinstance(option,dict) and option.get("IsPassword"):
                         option["Default"]=""
@@ -167,6 +226,7 @@ class Gateway(BaseHTTPRequestHandler):
             self.reply_json(502,safe_error(None,502))
         finally:
             if conn is not None: conn.close()
+            if locked: monitor.RC_LOCK.release()
 
     do_GET=forward
     do_POST=forward
@@ -183,4 +243,5 @@ class QuietServer(ThreadingHTTPServer):
         pass
 
 if __name__=="__main__":
+    threading.Thread(target=monitor.serve_background,daemon=True).start()
     QuietServer(("127.0.0.1",5573),Gateway).serve_forever()

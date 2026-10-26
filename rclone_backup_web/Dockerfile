@@ -8,9 +8,10 @@ RUN curl -fL --retry 3 \
       -o /tmp/web.tar.gz \
     && tar -xzf /tmp/web.tar.gz --strip-components=1 -C /web \
     && rm /tmp/web.tar.gz
-COPY patch_web.py patch_assets.cjs patch_setup.cjs test_setup.cjs ingress-bootstrap.html ha_config_flow.ts ha_safe_error.ts ha_remote_setup.ts /patch/
+COPY icloud-status.html icloud-status.mjs patch_web.py patch_assets.cjs patch_setup.cjs test_setup.cjs ingress-bootstrap.html ha_config_flow.ts ha_safe_error.ts ha_remote_setup.ts /patch/
 RUN python3 /patch/patch_web.py \
     && npm ci \
+    && cp /patch/icloud-status.* /web/public/ \
     && cp /patch/ha_*.ts /web/src/lib/ \
     && node /patch/patch_assets.cjs \
     && node /patch/patch_setup.cjs \

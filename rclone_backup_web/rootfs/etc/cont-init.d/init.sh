@@ -12,9 +12,12 @@ if [[ -z "$config_path" || "$config_path" == "null" ]]; then
     config_path=/homeassistant/rclone.conf
 fi
 if bashio::config.has_value 'rclone_config'; then
-    config_path=/root/.config/rclone/rclone.conf
+    # Import inline configuration only once; renewed tokens must survive restarts.
+    config_path=/data/rclone.conf
     umask 077
-    bashio::config 'rclone_config' > "$config_path"
+    if [[ ! -s "$config_path" ]]; then
+        bashio::config 'rclone_config' > "$config_path"
+    fi
 else
     mkdir -p "$(dirname "$config_path")"
     if [[ ! -f "$config_path" ]]; then

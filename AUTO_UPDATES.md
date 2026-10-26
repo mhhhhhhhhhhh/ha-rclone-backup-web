@@ -5,7 +5,7 @@
 1. Upload `.github/workflows/update-rclone.yml`, the heartbeat file, and all updated repository files to the default branch.
 2. In GitHub **Settings → Actions → General**, allow Actions and enable write permissions if required by your repository policy.
 3. Open **Actions → Automatic stable rclone update → Run workflow** to test it.
-4. Update the HA app to **1.2.1** and enable **Automatic updates** on its information page.
+4. Update the HA app to **1.3.0** and enable **Automatic updates** on its information page.
 
 If GitHub rejects hidden-file uploads, use **Add file → Create new file** and enter the full `.github/...` path.
 

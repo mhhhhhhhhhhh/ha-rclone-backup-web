@@ -3,6 +3,7 @@
 from pathlib import Path
 import re
 import subprocess
+import sys
 
 root=Path(__file__).resolve().parents[1]
 addon=root/'rclone_backup_web'
@@ -15,5 +16,6 @@ command=['docker','build','--pull','--platform','linux/amd64','--tag','rclone-up
          '--build-arg','BUILD_ARCH=amd64','--build-arg',f'BUILD_FROM={base[1]}']
 for key,value in args.items(): command+=['--build-arg',f'{key}={value}']
 command+=['.']
+subprocess.run([sys.executable, str(root/'tools/test_icloud_monitor.py')], cwd=root, check=True)
 print('Build-checking the prepared version on amd64; HA arm64 runtime is not tested.',flush=True)
 subprocess.run(command,cwd=addon,check=True)

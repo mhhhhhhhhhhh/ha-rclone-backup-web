@@ -65,7 +65,7 @@ def update(root, latest, if_new=True, heartbeat=False, today=None):
         changelog_file=directory/"CHANGELOG.md";changelog=changelog_file.read_text()
         heading,separator,rest=changelog.partition("\n")
         if not separator: raise ValueError("Invalid changelog")
-        entry=f"\n## {addon_version}\n\n- Automatisches Update auf die stabile rclone-Version {latest}.\n- Keine Änderung der MFA- und Ingress-Implementierung.\n"
+        entry=f"\n## {addon_version}\n\n- Automatic update to stable rclone {latest}.\n- No changes to the MFA or Ingress implementation.\n"
         changes[config_file]=config;changes[build_file]=build
         changes[changelog_file]=heading+"\n"+entry+rest
         changes[marker]=latest+"\n"

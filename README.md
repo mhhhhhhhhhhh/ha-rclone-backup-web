@@ -1,6 +1,6 @@
 # Rclone Backup Web
 
-Home Assistant app with rclone Web, Ingress, scheduled backups, and an added iCloud MFA dialog.
+Home Assistant app with rclone Web, Ingress, scheduled backups, and iCloud MFA and connection monitoring.
 
 ## Installation
 
@@ -19,6 +19,12 @@ config_path: /homeassistant/rclone.conf
 ```
 
 See `rclone_backup_web/DOCS.md` for backups and iCloud setup, and `AUTO_UPDATES.md` for automatic rclone updates.
+
+## iCloud monitoring
+
+Open **iCloud status** in the WebUI. Checks run every six hours by default. HA notifications warn when sign-in is required; a 27-day reminder is based on the last recorded login.
+
+Use **Renew sign-in** to complete MFA on the existing remote. No need to recreate the connection or backup jobs. See `rclone_backup_web/DOCS.md` for optional phone notifications.
 
 ## Test status
 

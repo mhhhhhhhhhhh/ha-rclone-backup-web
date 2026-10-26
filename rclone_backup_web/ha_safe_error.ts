@@ -1,4 +1,6 @@
 const allowed = [
+  'iCloud sign-in is required. Renew the existing remote in iCloud status.',
+  'iCloud access was rejected. Check Apple web access and device approval.',
   'Die Anmeldesitzung ist abgelaufen. Starte die iCloud-Anmeldung erneut.',
   'Bitte gib einen MFA-Code ein.',
   'Der MFA-Code wurde nicht akzeptiert. Prüfe den Code oder starte die Anmeldung erneut.',

@@ -15,6 +15,14 @@
   localStorage.setItem(key, JSON.stringify({state, version: 0}));
 
   // Keep config credentials/code out of browser request URLs, including SDK edits.
+
+  document.addEventListener('DOMContentLoaded',function(){
+    const link=document.createElement('a');link.href=prefix+'/icloud-status.html';
+    link.textContent='iCloud status';link.setAttribute('aria-label','iCloud connection monitoring and sign-in renewal');
+    link.style.cssText='position:fixed;right:16px;bottom:16px;z-index:10000;padding:10px 14px;border-radius:10px;background:#237649;color:#fff;text-decoration:none;font:14px system-ui;box-shadow:0 4px 16px #0005';
+    document.body.append(link);
+  });
+
   const originalFetch=window.fetch.bind(window);
   window.fetch=async function(input,init) {
     const req=new Request(input,init);

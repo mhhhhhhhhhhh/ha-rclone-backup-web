@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+- Added periodic iCloud checks, HA notifications, optional phone alerts, and estimated renewal reminders.
+- Added iCloud status page and MFA renewal on existing remotes using saved credentials.
+- Persisted monitoring metadata and inline configuration across restarts.
+- Added monitoring tests to the automatic-update build checks.
+
 ## 1.2.1
 
 - Automatic stable rclone checks, version bumps, and an amd64 build before publishing.

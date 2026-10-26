@@ -9,6 +9,8 @@ function load(file) {
   vm.runInNewContext(compiled.outputText,{module,exports:module.exports,Error,JSON,console},{filename:file});
   return module.exports;
 }
+const browserScript=ts.createSourceFile('icloud-status.mjs',fs.readFileSync('/patch/icloud-status.mjs','utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
+assert.equal(browserScript.parseDiagnostics.length,0,'iCloud status browser script syntax');
 const flow=load('/web/src/lib/ha_config_flow.ts');const safe=load('/web/src/lib/ha_safe_error.ts');
 const question={Name:'config_2fa',Required:true,Help:'Enter the code'};
 (async()=>{
