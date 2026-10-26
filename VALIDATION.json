@@ -1,0 +1,58 @@
+{
+  "checks": [
+    {
+      "file": "repository.yaml",
+      "check": "YAML parse",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/build.yaml",
+      "check": "YAML parse",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/config.yaml",
+      "check": "YAML parse",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/rootfs/etc/cont-init.d/init.sh",
+      "check": "bash -n",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/rootfs/etc/services.d/web-proxy/run",
+      "check": "bash -n",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/rootfs/etc/services.d/web-proxy/finish",
+      "check": "bash -n",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/rootfs/etc/services.d/rclone/run",
+      "check": "bash -n",
+      "result": "pass"
+    },
+    {
+      "file": "tools/refresh_rclone.py",
+      "check": "Python compilation",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/Dockerfile",
+      "check": "RUN sh -n",
+      "result": "pass"
+    }
+  ],
+  "not_executed": [
+    "Docker build",
+    "external downloads and checksum verification",
+    "Home Assistant installation",
+    "browser login",
+    "backup execution",
+    "mounting"
+  ],
+  "scope": "Direct browser access; no ingress"
+}
