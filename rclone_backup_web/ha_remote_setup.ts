@@ -126,3 +126,30 @@ export async function createRemoteWithQuestions(name: string,type: string,parame
     delete parameters.password;delete parameters.cookies;delete parameters.trust_token;
   }
 }
+
+export async function updateRemoteWithQuestions(name: string, parameters: Record<string, unknown>): Promise<void> {
+  try {
+    const current = await request('/config/get', {name});
+    if (current.type !== 'iclouddrive') {
+      await request('/config/update', {name, parameters});
+      return;
+    }
+    const changes = {...parameters};
+    // The edit form contains the existing obscured password. Do not obscure it twice.
+    if (changes.password === current.password || changes.password === '') delete changes.password;
+    delete changes.type;
+    delete changes.cookies;
+    delete changes.trust_token;
+    delete changes._auth_session;
+    await runICloudConfiguration(async (path, body) => {
+      const out = await request(path, body);
+      return {
+        State: typeof out.State === 'string' ? out.State : '',
+        Error: typeof out.Error === 'string' ? out.Error : '',
+        Option: typeof out.Option === 'object' && out.Option !== null ? out.Option as Question : null,
+      };
+    }, askConfiguration, name, changes, true);
+  } finally {
+    delete parameters.password; delete parameters.cookies; delete parameters.trust_token;
+  }
+}

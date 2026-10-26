@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2
+
+- Added MFA question handling to Save Changes in the remote edit form.
+- Retained existing obscured passwords instead of obscuring them twice.
+- Cleared sensitive edit fields after the save attempt.
+
 ## 1.3.1
 
 - Renamed the rclone download build argument to avoid collision with the boolean RCLONE_VERSION environment flag.

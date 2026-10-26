@@ -8,7 +8,7 @@
 
 Enter `sms` in the first MFA field to request an SMS code if supported. Existing iCloud remotes can be reauthenticated after confirmation without deleting them.
 
-Apple app-specific passwords are not supported by this rclone backend. Use **iCloud status → Renew sign-in** if authentication is required. The server uses your saved credentials; only the MFA code is requested. If your Apple password changed, update it in the remote settings first.
+Apple app-specific passwords are not supported by this rclone backend. Use **iCloud status → Renew sign-in** if authentication is required. **Save Changes** in the iCloud edit form also handles MFA questions. The server uses your saved credentials; only the MFA code is requested. If your Apple password changed, update it in the remote settings first.
 
 ## Scheduled backups
 

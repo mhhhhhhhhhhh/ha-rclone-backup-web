@@ -63,5 +63,16 @@ const question={Name:'config_2fa',Required:true,Help:'Enter the code'};
   });
   const diagnostics=ts.getPreEmitDiagnostics(program);
   if(diagnostics.length){console.error(ts.formatDiagnosticsWithColorAndContext(diagnostics,{getCurrentDirectory:()=>'/web',getCanonicalFileName:f=>f,getNewLine:()=> '\n'}));process.exitCode=1;return;}
+  const editCalls=[];
+  await flow.runICloudConfiguration(async(path,body)=>{
+    editCalls.push({path,body});
+    return editCalls.length===1 ? {State:'2fa_do',Option:question} : {State:''};
+  },async()=> '123456','existing-icloud',{service:'drive'},true);
+  assert.equal(editCalls[0].path,'/config/update');
+  assert.equal(editCalls[0].body.parameters.password,undefined);
+  assert.equal(editCalls[0].body.opt.nonInteractive,true);
+  assert.equal(editCalls[1].body.opt.state,'2fa_do');
+  assert.equal(editCalls[1].body.opt.result,'123456');
+  console.log('PASS: existing-remote edit uses update and MFA continuation without resending stored password');
   console.log('PASS: helper-module TypeScript typecheck');
 })().catch(error=>{console.error(error);process.exitCode=1;});
