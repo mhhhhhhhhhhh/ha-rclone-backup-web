@@ -46,7 +46,7 @@ FROM ${BUILD_FROM}
 ARG BUILD_ARCH
 ARG BUILD_VERSION
 ARG RCLONE_REFRESH=initial
-ARG RCLONE_VERSION=latest
+ARG APP_RCLONE_VERSION=latest
 ENV LANG=C.UTF-8
 RUN apk add --no-cache curl unzip nginx fuse python3 \
     && sed -i 's/#user_allow_other/user_allow_other/' /etc/fuse.conf \
@@ -64,7 +64,7 @@ RUN set -eu; \
       i386) arch=386 ;; \
       *) echo "Unsupported architecture" >&2; exit 1 ;; \
     esac; \
-    version="${RCLONE_VERSION}"; \
+    version="${APP_RCLONE_VERSION}"; \
     if [ "${version}" = latest ]; then \
       version="$(curl -fL --retry 3 https://downloads.rclone.org/version.txt | awk '{print $2}')"; \
     fi; \

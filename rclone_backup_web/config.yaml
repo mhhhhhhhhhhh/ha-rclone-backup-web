@@ -1,5 +1,5 @@
 name: Rclone Backup Web
-version: 1.3.0
+version: 1.3.1
 slug: rclone_backup_web
 description: Home Assistant backup scheduler with the new official Rclone Web UI
 arch:

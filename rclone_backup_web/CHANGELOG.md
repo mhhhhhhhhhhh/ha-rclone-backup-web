@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1
+
+- Renamed the rclone download build argument to avoid collision with the boolean RCLONE_VERSION environment flag.
+- Updated automatic version preparation to use the new argument.
+
 ## 1.3.0
 
 - Added periodic iCloud checks, HA notifications, optional phone alerts, and estimated renewal reminders.

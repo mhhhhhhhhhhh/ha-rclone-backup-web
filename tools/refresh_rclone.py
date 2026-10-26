@@ -59,7 +59,7 @@ def update(root, latest, if_new=True, heartbeat=False, today=None):
         if not match: raise ValueError("Cannot find app version")
         major,minor,patch=map(int,match.groups());addon_version=f"{major}.{minor}.{patch+1}"
         config=config[:match.start()]+f'version: "{addon_version}"'+config[match.end():]
-        for key,value in [("RCLONE_VERSION",latest),("RCLONE_REFRESH",f"auto-{addon_version}-{latest}")]:
+        for key,value in [("APP_RCLONE_VERSION",latest),("RCLONE_REFRESH",f"auto-{addon_version}-{latest}")]:
             build,count=re.subn(rf"^  {key}:.*$",f"  {key}: {value}",build,flags=re.M)
             if count!=1: raise ValueError(f"Expected exactly one {key} in build.yaml")
         changelog_file=directory/"CHANGELOG.md";changelog=changelog_file.read_text()
