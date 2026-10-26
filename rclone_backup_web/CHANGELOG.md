@@ -1,41 +1,28 @@
-# Änderungen
+# Changelog
 
 ## 1.2.1
 
-- Regelmäßige Prüfung stabiler rclone-Releases über GitHub Actions.
-- Versionsanhebung und Commit nur bei neuer rclone-Version.
-- Vor Veröffentlichung automatischer Updates muss ein amd64-Docker-Build bestehen.
-- Explizite rclone-Zielversion für reproduzierbare automatische Updates.
-- Monatlicher Repository-Heartbeat ohne zusätzliche HA-Updates.
+- Automatic stable rclone checks, version bumps, and an amd64 build before publishing.
+- Explicit rclone target version and monthly repository heartbeat.
 
 ## 1.2.0
 
-- iCloud-MFA-Dialog, SMS-Fallback und Telefonnummernauswahl.
-- Nicht-interaktive Konfiguration mit exakt weitergereichtem rclone-Zustand.
-- Leere Codes werden vor dem API-Aufruf abgefangen.
-- Fehler-Gateway entfernt Eingabedaten und ersetzt rohe Backendfehler durch sichere Meldungen.
-- Konfigurationsdaten und MFA-Code im JSON-Body statt in der URL.
-- UI-Fehlerfilter und Entfernen der Passwortfelder nach der Einrichtung.
-- Vorhandene iCloud-Remotes nur nach Bestätigung erneut anmelden; keine automatische Löschung.
+- Added iCloud MFA, SMS fallback, and phone selection.
+- Added state continuation and empty-code validation.
+- Filtered sensitive error data and moved configuration requests to JSON bodies.
+- Added confirmed reauthentication for existing iCloud remotes.
 
 ## 1.1.1
 
-- Build-Abbruch TS1005 in App.tsx behoben: Asset-Patch verwendet den TypeScript-Syntaxbaum statt einer globalen Regex.
-- CSS-Selektoren und Kommentare werden beim JSX-Patch nicht mehr verändert.
-- Regressionstest und Prüfung der TSX-Syntax laufen vor dem Web-Build.
+- Replaced the unsafe asset regex with a TypeScript AST patch.
+- Added asset-patch regression tests.
 
 ## 1.1.0
 
-- HA-Ingress mit Sidebar-Konfiguration statt direktem Netzwerkport.
-- Anmeldung über Home Assistant, keine zusätzliche UI-Anmeldung.
-- Web-Build mit dynamischem Router-Basispfad und passenden Asset-/API-Pfaden.
-- Uploads und Downloads über den HA-Ingress-Pfad.
-- Add-on-Slug und Backup-Scheduler bleiben erhalten.
+- Added HA Ingress and sidebar support without exposed network ports.
+- Adapted routing, assets, API calls, uploads, and downloads for Ingress.
 
 ## 1.0.0
 
-- Neue eingebettete offizielle Rclone-Weboberfläche.
-- Neueste stabile rclone-Version beim uncached Docker-Build, mit SHA256-Prüfung.
-- Ein Netzwerkport für WebUI und authentifizierte API.
-- Originaler Backup-Scheduler wird beim Build aus dem Upstream-Repository geladen.
-- Leere Jobliste für die erste Einrichtung.
+- Added rclone Web and the original backup scheduler.
+- Added stable rclone downloads with SHA256 verification.
