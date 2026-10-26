@@ -11,3 +11,6 @@ Beim Docker-Build werden folgende externe Komponenten heruntergeladen:
 Der Scheduler-Quellcode wird nicht als Kopie in diesem Repository mitgeliefert.
 UPSTREAM_REF in build.yaml bestimmt den heruntergeladenen Stand. Standard: main.
 Für reproduzierbarere Builds kann dort ein geprüfter Commit-Hash eingetragen werden.
+
+In 1.1.0 wird rclone-web separat aus dem Upstream-Quellcode gebaut und für
+HA-Ingress gepatcht. Die LICENSE des Webprojekts wird in das Image übernommen.

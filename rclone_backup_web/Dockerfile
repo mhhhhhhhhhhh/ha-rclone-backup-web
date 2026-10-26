@@ -1,4 +1,19 @@
 ARG BUILD_FROM
+FROM node:24-alpine AS web-build
+ARG WEB_REF=main
+RUN apk add --no-cache curl tar python3
+WORKDIR /web
+RUN curl -fL --retry 3 \
+      "https://codeload.github.com/rclone/rclone-web/tar.gz/${WEB_REF}" \
+      -o /tmp/web.tar.gz \
+    && tar -xzf /tmp/web.tar.gz --strip-components=1 -C /web \
+    && rm /tmp/web.tar.gz
+COPY patch_web.py ingress-bootstrap.html /patch/
+RUN python3 /patch/patch_web.py \
+    && npm ci \
+    && npm run build -- --base ./ \
+    && test -f dist/index.html
+
 FROM golang:1.26-alpine AS scheduler-build
 ARG UPSTREAM_REF=main
 ARG BUILD_ARCH
@@ -65,8 +80,11 @@ RUN set -eu; \
 COPY --from=scheduler-build /src/rclone_backup/rootfs/ /
 COPY --from=scheduler-build /src/LICENSE /usr/share/licenses/upstream-scheduler/LICENSE
 COPY --from=scheduler-build /out/scheduler /usr/bin/scheduler
+COPY --from=web-build /web/dist/ /usr/share/rclone-web/
+COPY --from=web-build /web/LICENSE /usr/share/licenses/rclone-web/LICENSE
 COPY rootfs/ /
 RUN chmod a+x /etc/cont-init.d/* /etc/services.d/*/* \
     && mkdir -p /run/nginx \
+    && grep -q __HA_BASE_PLACEHOLDER__ /usr/share/rclone-web/index.html \
     && nginx -t
 LABEL io.hass.type="addon" io.hass.arch="${BUILD_ARCH}" io.hass.version="${BUILD_VERSION}"

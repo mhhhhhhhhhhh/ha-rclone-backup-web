@@ -1,18 +1,29 @@
 {
+  "version": "1.1.0",
   "checks": [
     {
       "file": "repository.yaml",
-      "check": "YAML parse",
+      "check": "YAML parsing",
       "result": "pass"
     },
     {
       "file": "rclone_backup_web/build.yaml",
-      "check": "YAML parse",
+      "check": "YAML parsing",
       "result": "pass"
     },
     {
       "file": "rclone_backup_web/config.yaml",
-      "check": "YAML parse",
+      "check": "YAML parsing",
+      "result": "pass"
+    },
+    {
+      "file": "tools/refresh_rclone.py",
+      "check": "Python compilation",
+      "result": "pass"
+    },
+    {
+      "file": "rclone_backup_web/patch_web.py",
+      "check": "Python compilation",
       "result": "pass"
     },
     {
@@ -36,23 +47,23 @@
       "result": "pass"
     },
     {
-      "file": "tools/refresh_rclone.py",
-      "check": "Python compilation",
+      "file": "rclone_backup_web/Dockerfile",
+      "check": "RUN sh -n",
       "result": "pass"
     },
     {
-      "file": "rclone_backup_web/Dockerfile",
-      "check": "RUN sh -n",
+      "file": "ingress implementation",
+      "check": "metadata, loopback binding, gateway allowlist, HTML substitution, synthetic patch cases",
       "result": "pass"
     }
   ],
   "not_executed": [
     "Docker build",
-    "external downloads and checksum verification",
-    "Home Assistant installation",
-    "browser login",
-    "backup execution",
-    "mounting"
+    "npm ci and TypeScript/Vite build against live upstream",
+    "nginx configuration/runtime test (nginx -t runs in Docker build)",
+    "Home Assistant installation and sidebar toggle",
+    "browser navigation, API, uploads and downloads",
+    "backup execution and mounting"
   ],
-  "scope": "Direct browser access; no ingress"
+  "scope": "Home Assistant ingress implementation, runtime unverified"
 }

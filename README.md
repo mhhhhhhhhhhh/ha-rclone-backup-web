@@ -1,37 +1,46 @@
-# Rclone Backup Web für Home Assistant
+# Rclone Backup Web – Home-Assistant-Ingress
 
-Eigenes Add-on mit dem ursprünglichen Backup-Scheduler und der neuen offiziellen
-Rclone-Weboberfläche. Die neueste **stabile** rclone-Version wird beim Docker-Build
-ermittelt, heruntergeladen und anhand des offiziellen SHA256-Manifests geprüft.
-Keine Beta und kein automatischer Binary-Austausch beim Start.
+Version **1.1.0** ersetzt die bisherige Variante mit direktem Netzwerkport.
+Das Add-on stellt die neue offizielle rclone-web-Oberfläche über HA-Ingress bereit.
+Die neueste stabile rclone-Version wird beim Neubauen geladen und mit SHA256 geprüft.
 
-## Installation über dein GitHub-Repository
+## Vorhandene Installation aktualisieren
 
-1. Neues GitHub-Repository erstellen, beispielsweise `ha-rclone-backup-web`.
-2. Den **Inhalt** dieser ZIP in das Repository hochladen. `repository.yaml` und
-   der Ordner `rclone_backup_web` müssen direkt im Repository-Hauptverzeichnis liegen.
-3. In `repository.yaml` die Platzhalter DEIN-NAME und DEIN-REPOSITORY ersetzen.
-4. In Home Assistant: Einstellungen → Apps/Add-ons → Store → Menü → Repositorys.
-   Die URL deines GitHub-Repositorys hinzufügen.
-5. `Rclone Backup Web` installieren. Es wird lokal gebaut; ein GHCR-Image ist nicht nötig.
-6. In der Konfiguration einen Benutzernamen und ein eigenes Passwort setzen.
-7. Mit `jobs: []` starten und die Remotes in der Weboberfläche einrichten.
-8. Danach die bisherigen Backup-Jobs übernehmen und das Add-on neu starten.
+1. Inhalt der ZIP entpacken und die geänderten Dateien in dein vorhandenes GitHub-
+   Repository hochladen. Den gesamten Ordner `rclone_backup_web` einschließlich
+   Unterordnern übernehmen, nicht nur `config.yaml`.
+2. In `repository.yaml` deine eigene bereits eingetragene Repository-URL beibehalten
+   oder die enthaltenen Platzhalter durch deinen Namen und Repository-Namen ersetzen.
+3. In HA den App/Add-on-Store aktualisieren bzw. unter dem Menü nach Updates suchen.
+4. **Rclone Backup Web** auf **1.1.0** aktualisieren. Der lokale Docker-Build muss
+   ausgeführt werden, damit der angepasste Web-Build und Proxy installiert werden.
+5. App starten und **In der Seitenleiste anzeigen** aktivieren.
+6. **Weboberfläche öffnen** anklicken oder links **Rclone** öffnen.
 
-Der erste Build braucht Internetzugriff und Zeit für den Go-Scheduler-Build.
-GitHub lädt beim Hochladen keine Software in deine laufende HA-Installation.
+Der Slug `rclone_backup_web` bleibt unverändert. Vorhandene Job-Einstellungen und
+`/homeassistant/rclone.conf` werden weiterverwendet. Keine Deinstallation erforderlich.
+Die alten optionalen Einstellungen `gui_user` und `gui_password` werden bei einem
+Update toleriert, aber nicht mehr für die Anmeldung verwendet.
 
-## Zugriff
+## Neu installieren
 
-`Weboberfläche öffnen` führt zu `http://HA-IP:8099/start`.
-Alternativ diese Adresse direkt im Browser öffnen. Auf der Loginseite den unter
-`gui_user` und `gui_password` eingetragenen Zugang verwenden. Der Start-Link setzt
-bereits die API-Adresse. Bei geändertem Host-Port passt sich der Link an.
+ZIP-Inhalt direkt ins GitHub-Repository hochladen. `repository.yaml` und
+`rclone_backup_web` gehören ins Hauptverzeichnis. Repository-URL in HA hinzufügen,
+App installieren, mit `jobs: []` starten und Remotes über die Oberfläche einrichten.
+Danach Jobs ergänzen und die App neu starten.
 
-WebUI und API werden über **denselben Port** angeboten. Die internen Ports 8098
-und 5572 sind nicht veröffentlicht. Die API ist unter `/rc/` erreichbar und erfordert
-Zugangsdaten. Keine Portfreigabe ins Internet ohne passenden authentifizierten TLS-Proxy.
-Dieses Paket enthält **keine Home-Assistant-Ingress-Einbettung**.
+## HA-Anbindung
+
+- `ingress: true`, internes Ingress-Port 8099, Sidebar-Titel Rclone.
+- Keine veröffentlichten Netzwerkports und keine zweite Anmeldung.
+- Nginx nimmt nur Verbindungen vom HA-Ingress-Gateway 172.30.32.2 an.
+- Die RC-API läuft nur auf 127.0.0.1:5572.
+- Router, CSS/JS-Assets, API und temporäre Downloadserver sind für den dynamischen
+  Ingress-Pfad angepasst. Der Pfad kommt aus dem Header `X-Ingress-Path`.
+- Weboberfläche und API werden über dieselbe HA-Origin geladen; es ist keine
+  separate HTTP-Adresse im Browser erforderlich.
+- Ein externer Zugriff benötigt den funktionierenden externen Zugriff auf HA;
+  für diese App sind keine separaten Portfreigaben vorgesehen.
 
 ## Konfiguration
 
@@ -39,17 +48,9 @@ Dieses Paket enthält **keine Home-Assistant-Ingress-Einbettung**.
 jobs: []
 dry_run: true
 config_path: /homeassistant/rclone.conf
-gui_user: rclone
-gui_password: "HIER-DEIN-EIGENES-PASSWORT"
 ```
 
-Standardmäßig wird dieselbe Datei `/homeassistant/rclone.conf` verwendet wie im
-Original-Add-on. Eine vorhandene Datei bleibt erhalten. Falls `rclone_config` gesetzt
-ist, wird dessen Inhalt beim Start stattdessen in die interne Konfiguration geschrieben.
-Änderungen aus der WebUI an dieser internen Datei können beim nächsten Start dadurch
-überschrieben werden. Für dauerhaftes Bearbeiten in der UI `config_path` verwenden.
-
-Nach der Einrichtung beispielsweise:
+Beispiel nach Einrichtung des Remotes:
 
 ```yaml
 jobs:
@@ -64,51 +65,45 @@ jobs:
     flags: "{}"
 dry_run: true
 config_path: /homeassistant/rclone.conf
-gui_user: rclone
-gui_password: "HIER-DEIN-EIGENES-PASSWORT"
 ```
 
-Den echten Remote-Namen einsetzen. Erst mit `dry_run: true` prüfen; anschließend
-für tatsächliche Übertragungen auf `false` setzen. Jobs mit `sync` behalten die
-rclone-sync-Semantik einschließlich Löschen im Ziel.
+Nach erfolgreichem Probelauf `dry_run: false` setzen. `sync` behält die übliche
+Semantik einschließlich Entfernen von Dateien im Ziel.
 
-**Flags werden in dieser Variante als Zeichenkette geschrieben**, z.B.
-`flags: "{'drive-use-trash': 'false'}"`. Ein bisheriges `flags: {}` beim Übernehmen
-in `flags: "{}"` ändern. Als einfache Alternative `extra_flags` verwenden:
+Flags sind Zeichenketten, z.B. `flags: "{'drive-use-trash': 'false'}"`.
+Alternativ globale oder jobbezogene `extra_flags: ["--drive-use-trash=false"]` nutzen.
 
-```yaml
-extra_flags:
-  - --drive-use-trash=false
-```
+Eine vorhandene Konfiguration wird nicht ersetzt. Bei gesetztem `rclone_config`
+wird dessen Inhalt beim Start als interne Konfiguration geschrieben; für dauerhafte
+UI-Änderungen die Datei über `config_path` verwenden.
 
-Globale und jobbezogene `extra_flags` werden unterstützt. Der Scheduler läuft getrennt
-von der UI: Seine per CLI gestarteten Backup-Übertragungen erscheinen nicht zwangsläufig
-in der Transferliste des RC-Daemons. Zeitpläne weiter in der Add-on-Konfiguration verwalten.
-Ein neues Add-on hat einen eigenen Slug; bestehende Automationen zum Neustart des alten
-Add-ons müssen auf das neue Add-on umgestellt werden.
+Zeitpläne werden vom originalen Scheduler ausgeführt und weiterhin im Add-on
+konfiguriert. Seine CLI-Prozesse sind getrennt vom RC-Daemon; die UI-Transferliste
+zeigt deshalb nicht zwingend die automatisch gestarteten Backup-Jobs.
+Die Mount-Funktion hängt weiterhin von FUSE und den Containerrechten ab. Neu
+angelegte Serve-Endpunkte bekommen keine automatischen externen Portfreigaben.
 
-## Später auf die neueste stabile rclone-Version aktualisieren
+## rclone später aktualisieren
 
-Auf einem PC mit Python 3 im Repository-Verzeichnis ausführen:
+Auf dem PC im Repository-Verzeichnis `python tools/refresh_rclone.py` ausführen,
+geänderte Dateien hochladen und anschließend die App in HA aktualisieren.
+Ein normaler App-Neustart führt kein Versionsupdate durch.
 
-```bash
-python tools/refresh_rclone.py
-```
+## Build-Abhängigkeiten
 
-Das Skript liest die aktuelle stabile Version, erhöht die Add-on-Versionsnummer,
-aktualisiert den Cache-Schlüssel und trägt die Änderung im Changelog ein.
-Die geänderten Dateien nach GitHub hochladen. Anschließend in Home Assistant den Store
-aktualisieren und das Add-on-Update installieren. Beim Build wird die dann aktuelle
-stabile Version geladen. **Ein bloßer Neustart aktualisiert rclone nicht.**
+Beim Build werden der Original-Scheduler aus `jcwillox/hassio-rclone-backup`,
+rclone-Webquellen aus `rclone/rclone-web`, npm-Abhängigkeiten und rclone geladen.
+Dafür ist Internet erforderlich. Der zusätzliche Web-Build benötigt Zeit und RAM.
+`UPSTREAM_REF` und `WEB_REF` in build.yaml stehen auf `main`; geprüfte Commit-Hashes
+können für einen reproduzierbareren Quellstand eingesetzt werden. Wenn sich die
+Webquellen so ändern, dass die Ingress-Patches nicht mehr passen, bricht der Build
+mit einem Hinweis ab, statt stillschweigend ein ungepatchtes Frontend zu liefern.
 
-## Herkunft und Teststatus
+## Teststatus
 
-Der Original-Scheduler und seine Rootfs-Dateien werden beim Build aus
-`jcwillox/hassio-rclone-backup` geladen. Siehe NOTICE.md. Die Basisimages entsprechen
-dem geprüften Build-Manifest des Ursprungsrepositorys. `UPSTREAM_REF: main` ist eine
-bewegliche Abhängigkeit; ein Commit-Hash kann ihn ersetzen.
-
-Die mitgelieferten Dateien wurden auf YAML-Struktur, Shell-Syntax und Archivvollständigkeit
-geprüft. Ein Docker-Build und ein Laufzeittest unter Home Assistant wurden in der
-Erstellungsumgebung **nicht** durchgeführt. Das Paket ist daher kein bereits getestetes
-Release. Die Datei VALIDATION.json dokumentiert genau die ausgeführten Prüfungen.
+YAML, Shell- und Python-Syntax, Docker-RUN-Shellsyntax, Metadaten, Archivvollständigkeit
+sowie die Patch-Transformationen gegen synthetische Quelltextausschnitte wurden geprüft.
+**Kein Docker-/npm-Build, kein nginx-Laufzeittest und kein Test auf einer echten
+Home-Assistant-Installation wurden hier ausgeführt.** Das ist ein Implementierungsstand
+mit Ingress-Unterstützung, kein als funktionierend verifiziertes HA-Release.
+VALIDATION.json nennt die ausgeführten und ausstehenden Prüfungen.

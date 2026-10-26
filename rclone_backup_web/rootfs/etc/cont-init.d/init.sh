@@ -1,14 +1,7 @@
 #!/usr/bin/with-contenv bashio
 set -eu
 
-# Ensure that setup with no remotes and no jobs can start.
-user="$(bashio::config 'gui_user')"
-password="$(bashio::config 'gui_password')"
-if [[ -z "$user" || -z "$password" ]]; then
-    bashio::log.fatal "Set gui_user and gui_password before starting the add-on."
-    exit 1
-fi
-
+# Login is handled by Home Assistant ingress, not by a second UI password.
 mkdir -p /root/.config/rclone /var/run/s6/container_environment /run/nginx
 if [[ ! -e /config ]]; then
     ln -s /homeassistant /config

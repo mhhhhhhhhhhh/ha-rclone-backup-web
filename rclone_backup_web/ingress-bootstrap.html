@@ -1,0 +1,17 @@
+<base href="__HA_BASE_PLACEHOLDER__/">
+<script>
+(function () {
+  const prefix = "__HA_BASE_PLACEHOLDER__";
+  window.__HA_INGRESS_PATH__ = prefix;
+  const key = 'ha-rclone-web-auth';
+  let previous = {};
+  try { previous = JSON.parse(localStorage.getItem(key) || '{}').state || {}; } catch (_) {}
+  const state = {
+    ...previous,
+    url: location.origin + prefix + '/rc',
+    user: '',
+    pass: ''
+  };
+  localStorage.setItem(key, JSON.stringify({state, version: 0}));
+})();
+</script>
