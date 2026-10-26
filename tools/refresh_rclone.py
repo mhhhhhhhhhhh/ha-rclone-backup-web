@@ -1,51 +1,103 @@
 #!/usr/bin/env python3
-"""Refresh the stable-version build cache and bump the local add-on version."""
-from datetime import datetime, timezone
+"""Prepare an HA update for stable rclone. Scheduled mode is idempotent.
+No arguments: force a manual rebuild/version bump, matching earlier helper behavior.
+--if-new: modify version metadata only when a newer stable rclone was detected.
+--heartbeat: maintain monthly repository activity without creating an HA update.
+"""
+import argparse
+import datetime as dt
+import json
+import os
 from pathlib import Path
 import re
-import urllib.error
+import time
 import urllib.request
 
+VERSION_URL = "https://downloads.rclone.org/version.txt"
 
-def main() -> None:
-    root = Path(__file__).resolve().parents[1]
-    request = urllib.request.Request(
-        "https://downloads.rclone.org/version.txt",
-        headers={"User-Agent": "ha-rclone-backup-web-refresh"},
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            remote = response.read(1024).decode("utf-8").strip()
-    except (urllib.error.URLError, UnicodeError) as exc:
-        raise SystemExit(f"Could not retrieve stable version: {exc}") from exc
-    match = re.fullmatch(r"rclone (v\d+\.\d+\.\d+)", remote)
-    if not match:
-        raise SystemExit(f"Unexpected version response: {remote!r}")
-    stable = match.group(1)
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-    addon = root / "rclone_backup_web"
-    config_path = addon / "config.yaml"
-    config = config_path.read_text(encoding="utf-8")
-    version_match = re.search(r'''^version:\s*["\']?(\d+)\.(\d+)\.(\d+)["\']?\s*$''', config, re.M)
-    if not version_match:
-        raise SystemExit("Cannot find add-on version; no files changed.")
-    major, minor, patch = map(int, version_match.groups())
-    new_version = f"{major}.{minor}.{patch + 1}"
-    updated_config = config[:version_match.start()] + f'version: "{new_version}"' + config[version_match.end():]
-    build_path = addon / "build.yaml"
-    build = build_path.read_text(encoding="utf-8")
-    updated_build, count = re.subn(r'^  RCLONE_REFRESH: .+$', f'  RCLONE_REFRESH: "{stable}-{stamp}"', build, flags=re.M)
-    if count != 1:
-        raise SystemExit("Cannot find unique cache key; no files changed.")
-    changelog_path = addon / "CHANGELOG.md"
-    changelog = changelog_path.read_text(encoding="utf-8")
-    entry = f"## {new_version}\n\n- Build-Cache erneuert für stabile rclone-Version {stable}.\n\n"
-    config_path.write_text(updated_config, encoding="utf-8")
-    build_path.write_text(updated_build, encoding="utf-8")
-    changelog_path.write_text(changelog.replace("# Änderungen\n\n", "# Änderungen\n\n" + entry, 1), encoding="utf-8")
-    print(f"Stable rclone: {stable}; add-on version: {new_version}")
-    print("Upload changed files to GitHub, then update/rebuild the add-on in Home Assistant.")
+def parse_version(value):
+    match=re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)",value.strip())
+    if not match: raise ValueError("Expected a stable x.y.z rclone version")
+    return tuple(map(int,match.groups()))
 
+def latest_version():
+    for attempt in range(3):
+        try:
+            request=urllib.request.Request(VERSION_URL,headers={"User-Agent":"ha-rclone-stable-updater"})
+            with urllib.request.urlopen(request,timeout=30) as response:
+                text=response.read(512).decode().strip()
+            match=re.fullmatch(r"rclone (v\d+\.\d+\.\d+)",text)
+            if not match: raise ValueError("Unexpected stable version response")
+            parse_version(match[1]);return match[1]
+        except (OSError,ValueError):
+            if attempt==2: raise
+            time.sleep(2**attempt)
 
-if __name__ == "__main__":
-    main()
+def atomic_write(file,content):
+    file.parent.mkdir(parents=True,exist_ok=True)
+    temporary=file.with_name(file.name+".tmp")
+    temporary.write_text(content,encoding="utf-8")
+    temporary.replace(file)
+
+def update(root, latest, if_new=True, heartbeat=False, today=None):
+    today=today or dt.datetime.now(dt.timezone.utc).date()
+    directory=root/"rclone_backup_web"
+    marker=directory/"rclone-version.txt"
+    previous=marker.read_text().strip() if marker.exists() else None
+    current_tuple=parse_version(previous) if previous else None
+    new_tuple=parse_version(latest)
+    newer=current_tuple is None or new_tuple>current_tuple
+    print(f"Stable rclone: {latest}; recorded target: {previous or 'none'}")
+    changes={}
+    addon_version=None
+    if current_tuple is not None and new_tuple<current_tuple:
+        print("Ignoring an older upstream version; automatic downgrade is disabled.")
+    elif newer or not if_new:
+        config_file=directory/"config.yaml";build_file=directory/"build.yaml"
+        config=config_file.read_text();build=build_file.read_text()
+        match=re.search(r'''^version:\s*["']?(\d+)\.(\d+)\.(\d+)["']?\s*$''',config,re.M)
+        if not match: raise ValueError("Cannot find app version")
+        major,minor,patch=map(int,match.groups());addon_version=f"{major}.{minor}.{patch+1}"
+        config=config[:match.start()]+f'version: "{addon_version}"'+config[match.end():]
+        for key,value in [("RCLONE_VERSION",latest),("RCLONE_REFRESH",f"auto-{addon_version}-{latest}")]:
+            build,count=re.subn(rf"^  {key}:.*$",f"  {key}: {value}",build,flags=re.M)
+            if count!=1: raise ValueError(f"Expected exactly one {key} in build.yaml")
+        changelog_file=directory/"CHANGELOG.md";changelog=changelog_file.read_text()
+        heading,separator,rest=changelog.partition("\n")
+        if not separator: raise ValueError("Invalid changelog")
+        entry=f"\n## {addon_version}\n\n- Automatisches Update auf die stabile rclone-Version {latest}.\n- Keine Änderung der MFA- und Ingress-Implementierung.\n"
+        changes[config_file]=config;changes[build_file]=build
+        changes[changelog_file]=heading+"\n"+entry+rest
+        changes[marker]=latest+"\n"
+        report_file=root/"VALIDATION.json"
+        report=json.loads(report_file.read_text()) if report_file.exists() else {}
+        report['version']=addon_version
+        report['automatic_rclone_update']={'target':latest,'prepared_on':today.isoformat(),'container_build':'pending (must pass before automatic publish)','real_apple_login':'not tested'}
+        changes[report_file]=json.dumps(report,indent=2,ensure_ascii=False)+"\n"
+    else:
+        print("No newer stable release; no app-version bump.")
+    if heartbeat:
+        file=root/".github/rclone-update-heartbeat.txt"
+        try: last=dt.date.fromisoformat(file.read_text().strip())
+        except (OSError,ValueError): last=None
+        if last is None or (today-last).days>=30:
+            changes[file]=today.isoformat()+"\n"
+            print("Monthly repository heartbeat prepared; no additional HA update.")
+    # Validate all metadata before performing any write.
+    for file,content in changes.items(): atomic_write(file,content)
+    return addon_version is not None,addon_version
+
+def main(argv=None):
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--if-new',action='store_true')
+    parser.add_argument('--heartbeat',action='store_true')
+    args=parser.parse_args(argv)
+    root=Path(__file__).resolve().parents[1]
+    updated,version=update(root,latest_version(),if_new=args.if_new,heartbeat=args.heartbeat)
+    if os.environ.get('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as output:
+            output.write(f"updated={'true' if updated else 'false'}\n")
+            output.write(f"addon_version={version or ''}\n")
+    if updated: print(f"Prepared app version {version}; build/install required to apply rclone.")
+
+if __name__=='__main__': main()

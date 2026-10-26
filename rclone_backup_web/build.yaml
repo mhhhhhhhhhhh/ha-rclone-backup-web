@@ -5,6 +5,7 @@ build_from:
   armv7: ghcr.io/hassio-addons/base-python/armv7:16.1.4
   i386: ghcr.io/hassio-addons/base-python/i386:16.1.4
 args:
-  RCLONE_REFRESH: mfa-security-1.2.0-2026-10-26
+  RCLONE_REFRESH: auto-1.2.1-v1.75.2
   UPSTREAM_REF: main
   WEB_REF: main
+  RCLONE_VERSION: v1.75.2

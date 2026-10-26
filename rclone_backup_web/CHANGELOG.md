@@ -1,5 +1,13 @@
 # Änderungen
 
+## 1.2.1
+
+- Regelmäßige Prüfung stabiler rclone-Releases über GitHub Actions.
+- Versionsanhebung und Commit nur bei neuer rclone-Version.
+- Vor Veröffentlichung automatischer Updates muss ein amd64-Docker-Build bestehen.
+- Explizite rclone-Zielversion für reproduzierbare automatische Updates.
+- Monatlicher Repository-Heartbeat ohne zusätzliche HA-Updates.
+
 ## 1.2.0
 
 - iCloud-MFA-Dialog, SMS-Fallback und Telefonnummernauswahl.

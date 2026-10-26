@@ -1,4 +1,4 @@
-# Rclone Backup Web für Home Assistant – 1.2.0
+# Rclone Backup Web für Home Assistant – 1.2.1
 
 Neue offizielle rclone-Weboberfläche mit Home-Assistant-Ingress, originalem
 Backup-Scheduler und ergänztem iCloud-MFA-Ablauf. Die neueste stabile rclone-Version
@@ -11,7 +11,7 @@ wird beim Docker-Build geladen und mit SHA256 geprüft.
    Auch aktualisierte Dateien in `tools` und die Dokumentation übernehmen.
 2. Bei Verwendung des Komplettpakets die eigene Repository-URL in `repository.yaml`
    beibehalten. Das Korrekturpaket enthält diese Datei nicht.
-3. HA App/Add-on-Store aktualisieren. Prüfen, dass Version **1.2.0** angeboten wird.
+3. HA App/Add-on-Store aktualisieren. Prüfen, dass Version **1.2.1** angeboten wird.
 4. Update installieren, App starten und **Weboberfläche öffnen** anklicken.
    **In der Seitenleiste anzeigen** kann aktiviert werden.
 5. Browserseite neu laden, damit die neue Einrichtungslogik geladen wird.
@@ -127,3 +127,9 @@ Codes, Abbruch, vorhandene Remotes und Fehlerfilter aus, danach den vollständig
 TypeScript/Vite-Build. Diese Node-Tests konnten in der Erstellungsumgebung mangels
 Node/Docker nicht ausgeführt werden. **Kein echter Apple-Login und kein Laufzeittest
 unter Home Assistant wurde hier durchgeführt.** VALIDATION.json nennt die Details.
+
+## Automatische rclone-Updates
+
+Die einmalige GitHub-/HA-Einrichtung steht in AUTO_UPDATES.md. Danach prüft der
+Workflow stabile rclone-Releases, veröffentlicht geprüfte Versionsmetadaten und HA
+kann mit aktiviertem „Automatische Updates“-Schalter die App selbst aktualisieren.

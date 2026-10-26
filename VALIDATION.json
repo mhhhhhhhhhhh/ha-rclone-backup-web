@@ -1,96 +1,120 @@
 {
-  "version": "1.2.0",
-  "executed_tests": [
-    "Gateway preserves MFA question/state and strips echoed input",
-    "MFA state continuation over loopback HTTP completes on simulated accepted code",
-    "Wrong-code errors classified; password/cookie/token/code not returned",
-    "Generic raw backend error sanitized",
-    "Password question Default cleared",
-    "Legacy configuration query normalized into upstream JSON body",
-    "Chunked upload streamed correctly",
-    "Gateway request/error logs contain no raw secrets"
+  "version": "1.2.1",
+  "automation_tests_executed": [
+    "Same stable release: no file changes and no HA update",
+    "New stable release: metadata, explicit target and changelog bump exactly once",
+    "Repeated run is idempotent",
+    "Older upstream version does not trigger a downgrade",
+    "Monthly heartbeat changes no HA metadata",
+    "Manual helper retains forced rebuild/version-bump behavior",
+    "Stable version validation rejects beta input"
   ],
-  "build_time_tests_not_executed_locally": [
-    "Node MFA/SMS/phone-selection flow tests",
-    "Empty-code validation",
-    "Incorrect-code retries",
-    "Cancellation",
-    "Existing remote uses update, not delete/create",
-    "Frontend error sanitization",
-    "Own helper TypeScript typecheck",
-    "Full upstream tsc/Vite build"
+  "checks": [
+    "workflow structure",
+    "workflow bash syntax",
+    "Python compilation",
+    "Docker RUN shell syntax"
   ],
   "not_executed": [
-    "Full Docker build",
-    "Real Home Assistant runtime",
-    "Real Apple account login",
-    "Apple account-specific policy and access checks"
+    "GitHub Actions run and authenticated git push",
+    "Docker build in this environment",
+    "HA automatic update",
+    "real Apple MFA"
   ],
-  "syntax_and_file_checks": [
-    {
-      "file": "repository.yaml",
-      "check": "YAML parse",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/build.yaml",
-      "check": "YAML parse",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/config.yaml",
-      "check": "YAML parse",
-      "result": "pass"
-    },
-    {
-      "file": "tools/refresh_rclone.py",
-      "check": "Python compilation",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/patch_web.py",
-      "check": "Python compilation",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/rootfs/etc/cont-init.d/init.sh",
-      "check": "bash -n",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/rootfs/etc/services.d/rc-gateway/run",
-      "check": "bash -n",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/rootfs/etc/services.d/rc-gateway/finish",
-      "check": "bash -n",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/rootfs/etc/services.d/web-proxy/run",
-      "check": "bash -n",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/rootfs/etc/services.d/web-proxy/finish",
-      "check": "bash -n",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/rootfs/etc/services.d/rclone/run",
-      "check": "bash -n",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/rootfs/usr/bin/rc_gateway.py",
-      "check": "Python compilation",
-      "result": "pass"
-    },
-    {
-      "file": "rclone_backup_web/Dockerfile",
-      "check": "RUN sh -n",
-      "result": "pass"
-    }
-  ]
+  "previous_implementation_validation": {
+    "version": "1.2.0",
+    "executed_tests": [
+      "Gateway preserves MFA question/state and strips echoed input",
+      "MFA state continuation over loopback HTTP completes on simulated accepted code",
+      "Wrong-code errors classified; password/cookie/token/code not returned",
+      "Generic raw backend error sanitized",
+      "Password question Default cleared",
+      "Legacy configuration query normalized into upstream JSON body",
+      "Chunked upload streamed correctly",
+      "Gateway request/error logs contain no raw secrets"
+    ],
+    "build_time_tests_not_executed_locally": [
+      "Node MFA/SMS/phone-selection flow tests",
+      "Empty-code validation",
+      "Incorrect-code retries",
+      "Cancellation",
+      "Existing remote uses update, not delete/create",
+      "Frontend error sanitization",
+      "Own helper TypeScript typecheck",
+      "Full upstream tsc/Vite build"
+    ],
+    "not_executed": [
+      "Full Docker build",
+      "Real Home Assistant runtime",
+      "Real Apple account login",
+      "Apple account-specific policy and access checks"
+    ],
+    "syntax_and_file_checks": [
+      {
+        "file": "repository.yaml",
+        "check": "YAML parse",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/build.yaml",
+        "check": "YAML parse",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/config.yaml",
+        "check": "YAML parse",
+        "result": "pass"
+      },
+      {
+        "file": "tools/refresh_rclone.py",
+        "check": "Python compilation",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/patch_web.py",
+        "check": "Python compilation",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/rootfs/etc/cont-init.d/init.sh",
+        "check": "bash -n",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/rootfs/etc/services.d/rc-gateway/run",
+        "check": "bash -n",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/rootfs/etc/services.d/rc-gateway/finish",
+        "check": "bash -n",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/rootfs/etc/services.d/web-proxy/run",
+        "check": "bash -n",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/rootfs/etc/services.d/web-proxy/finish",
+        "check": "bash -n",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/rootfs/etc/services.d/rclone/run",
+        "check": "bash -n",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/rootfs/usr/bin/rc_gateway.py",
+        "check": "Python compilation",
+        "result": "pass"
+      },
+      {
+        "file": "rclone_backup_web/Dockerfile",
+        "check": "RUN sh -n",
+        "result": "pass"
+      }
+    ]
+  }
 }
