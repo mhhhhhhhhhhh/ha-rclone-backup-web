@@ -1,0 +1,65 @@
+name: Automatic stable rclone update
+
+on:
+  schedule:
+    - cron: '37 4,16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stable-rclone-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out the default branch
+        uses: actions/checkout@v6.1.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 1
+
+      - name: Check stable rclone and prepare metadata
+        id: check
+        run: python3 tools/refresh_rclone.py --if-new --heartbeat
+
+      - name: Build and test before publishing an update
+        if: steps.check.outputs.updated == 'true'
+        run: python3 tools/build_check.py
+
+      - name: Record successful build
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          file = Path('VALIDATION.json')
+          data = json.loads(file.read_text())
+          data['automatic_rclone_update']['container_build'] = 'amd64 build passed in GitHub Actions; arm64 and real Apple login not tested'
+          file.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n')
+          PY
+
+      - name: Commit the update or monthly heartbeat
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add rclone_backup_web/config.yaml rclone_backup_web/build.yaml \
+            rclone_backup_web/CHANGELOG.md rclone_backup_web/rclone-version.txt \
+            VALIDATION.json .github/rclone-update-heartbeat.txt
+          if git diff --cached --quiet; then
+            echo 'No changes to publish.'
+            exit 0
+          fi
+          if git diff --cached --name-only | grep -q '^rclone_backup_web/config.yaml$'; then
+            VERSION="$(cat rclone_backup_web/rclone-version.txt)"
+            git commit -m "chore: update stable rclone to ${VERSION}"
+          else
+            git commit -m 'chore: keep automatic rclone checks active'
+          fi
+          git push origin "HEAD:${DEFAULT_BRANCH}"
