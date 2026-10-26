@@ -1,0 +1,70 @@
+name: Rclone Backup Web
+version: "1.0.0"
+slug: rclone_backup_web
+description: Home Assistant backup scheduler with the new official Rclone Web UI
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+startup: application
+boot: auto
+init: false
+homeassistant_api: true
+ingress: false
+webui: "http://[HOST]:[PORT:8099]/start"
+ports:
+  8099/tcp: 8099
+ports_description:
+  8099/tcp: Rclone Web and authenticated RC API
+map:
+  - homeassistant_config:rw
+  - addon_config:rw
+  - backup:rw
+  - media:rw
+  - share:rw
+  - ssl:ro
+devices:
+  - /dev/fuse
+privileged:
+  - SYS_ADMIN
+apparmor: false
+options:
+  jobs: []
+  dry_run: true
+  config_path: /homeassistant/rclone.conf
+  gui_user: rclone
+  gui_password: ""
+schema:
+  jobs:
+    - name: str?
+      schedule: str?
+      command: str
+      source: str?
+      sources:
+        - str?
+      destination: str?
+      destinations:
+        - str?
+      include:
+        - str?
+      exclude:
+        - str?
+      flags: str?
+      extra_flags:
+        - str?
+  dry_run: bool?
+  flags: str?
+  extra_flags:
+    - str?
+  run_once: bool?
+  config_path: str?
+  rclone_config: str?
+  no_rename: bool?
+  no_unrename: bool?
+  no_slugify: bool?
+  no_events: bool?
+  log_level: list(debug|info|warning|error|fatal)?
+  gui_user: str
+  gui_password: password

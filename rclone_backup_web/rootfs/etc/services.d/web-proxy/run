@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bashio
+set -eu
+bashio::log.info "Starting the single-port web proxy on port 8099"
+exec nginx -g 'daemon off;'

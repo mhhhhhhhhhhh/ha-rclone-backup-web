@@ -1,0 +1,7 @@
+#!/usr/bin/env bashio
+code="${1:-1}"
+if [[ "$code" != 0 && "$code" != 256 ]]; then
+    bashio::log.error "Web proxy exited with status $code"
+    printf '%s' "$code" > /run/s6-linux-init-container-results/exitcode
+    exec /run/s6/basedir/bin/halt
+fi

@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv bashio
+set -eu
+bashio::log.info "Starting the embedded Rclone Web UI and authenticated API"
+exec rclone gui \
+    --no-open-browser \
+    --addr=127.0.0.1:8098 \
+    --api-addr=127.0.0.1:5572 \
+    --user="$(bashio::config 'gui_user')" \
+    --pass="$(bashio::config 'gui_password')"
