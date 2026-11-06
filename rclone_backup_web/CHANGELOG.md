@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.3
+
+- Automatic update to stable rclone v1.76.0.
+- No changes to the MFA or Ingress implementation.
+
 ## 1.3.2
 
 - Added MFA question handling to Save Changes in the remote edit form.

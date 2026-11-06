@@ -1,5 +1,5 @@
 {
-  "version": "1.3.2",
+  "version": "1.3.3",
   "fix": "Remote edit Save Changes routed through noninteractive MFA state machine",
   "checks_passed": [
     "Python/YAML syntax",
@@ -190,5 +190,11 @@
         }
       }
     }
+  },
+  "automatic_rclone_update": {
+    "target": "v1.76.0",
+    "prepared_on": "2026-11-06",
+    "container_build": "amd64 build passed in GitHub Actions; arm64 and real Apple login not tested",
+    "real_apple_login": "not tested"
   }
 }
